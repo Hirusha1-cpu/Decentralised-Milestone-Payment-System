@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "coverage": "npx hardhat coverage",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:goerli": "npx hardhat run scripts/deploy.js --network goerli",
+    "verify": "npx hardhat verify",
+    "clean": "npx hardhat clean"
   },
   "repository": {
     "type": "git",
