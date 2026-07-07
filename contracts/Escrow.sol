@@ -137,7 +137,39 @@ contract Escrow is ReentrancyGuard, IEscrow {
         emit FundsReleased(escrowId, msg.sender, amount);
     }
 
+    // dispute can call by the client or freelancer and state should be completed
+    function raiseDispute(uint256 escrowId) external override inState(escrowId, EscrowLibrary.State.Completed) {
+        // check whether the caller is either the client or the freelancer
+        if (msg.sender != escrows[escrowId].client && 
+            msg.sender != escrows[escrowId].freelancer) {
+            revert Errors.NotClientOrFreelancer();
+        }
+        // mark the escrow as in dispute
+        escrows[escrowId].currentState = EscrowLibrary.State.Disputed;
+        // emit the dispute raised event
+        emit DisputeRaised(escrowId, msg.sender);
+    }
 
+
+    function resolveDispute(uint256 escrowId,  address winner) external override inState(escrowId, EscrowLibrary.State.Disputed) onlyArbitrator(escrowId) nonReentrant {
+        // check whether the winner is either the client or the freelancer
+        if (winner != escrows[escrowId].client && 
+            winner != escrows[escrowId].freelancer) {
+            revert Errors.InvalidWinner();
+        }
+        // get the escrow data and mark the escrow as resolved
+        EscrowLibrary.EscrowData storage escrow = escrows[escrowId];
+        escrow.currentState = EscrowLibrary.State.Resolved;
+        // transfer the funds to the winner and set the amount to 0 to prevent reentrancy attacks
+        uint256 amount = escrow.amount;
+        escrow.amount = 0;
+        // transfer the funds to the winner
+        (bool success, ) = winner.call{value: amount}("");
+        if (!success) revert Errors.TransferFailed();
+        // emit the dispute resolved event
+        emit DisputeResolved(escrowId, winner, amount);
+        
+    }
 
 
 
