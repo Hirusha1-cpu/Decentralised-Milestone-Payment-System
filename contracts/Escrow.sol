@@ -150,7 +150,7 @@ contract Escrow is ReentrancyGuard, IEscrow {
         emit DisputeRaised(escrowId, msg.sender);
     }
 
-
+    // function for the arbitrator to resolve the dispute and state should be disputed and only the arbitrator can call this function
     function resolveDispute(uint256 escrowId,  address winner) external override inState(escrowId, EscrowLibrary.State.Disputed) onlyArbitrator(escrowId) nonReentrant {
         // check whether the winner is either the client or the freelancer
         if (winner != escrows[escrowId].client && 
@@ -169,6 +169,39 @@ contract Escrow is ReentrancyGuard, IEscrow {
         // emit the dispute resolved event
         emit DisputeResolved(escrowId, winner, amount);
         
+    }
+
+    // function for the client to refund the funds to the client and state should be pending and only the client can call this function
+    function refund(uint256 escrowId) external override onlyClient(escrowId) inState(escrowId, EscrowLibrary.State.Pending) nonReentrant {
+        // check if the deadline has passed
+        if (block.timestamp <= escrows[escrowId].deadline) 
+         revert Errors.DeadlineNotPassed();
+        // get the escrow data and mark the escrow as refunded
+        EscrowLibrary.EscrowData storage escrow = escrows[escrowId];
+        escrow.currentState = EscrowLibrary.State.Refunded;
+        // transfer the funds to the client and set the amount to 0 to prevent reentrancy attacks
+        uint256 amount = escrow.amount;
+        escrow.amount = 0;
+        // transfer the funds to the client
+        (bool success, ) = escrow.client.call{value: amount}("");
+        if (!success) revert Errors.TransferFailed();
+        // emit the refunded event
+        emit Refunded(escrowId, escrow.client, amount);
+        
+    }
+
+    // ========== VIEW FUNCTIONS ==========
+    // function for the client or freelancer to get the escrow details and state should be valid
+     function getEscrowDetails(uint256 escrowId)  external view override returns (EscrowLibrary.EscrowData memory){
+        return escrows[escrowId];
+    }
+
+    function getState(uint256 escrowId) external view override returns (EscrowLibrary.State) {
+        return escrows[escrowId].currentState;
+    }
+
+    function getEscrowCounter() external view override returns (uint256) {
+        return escrowCounter;
     }
 
 
