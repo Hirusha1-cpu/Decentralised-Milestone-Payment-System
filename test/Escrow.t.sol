@@ -64,7 +64,7 @@ contract EscrowTest is Test {
 
     }  
 
-    // function for test the dispute and resolve the dispute
+    // function for test the dispute and raise the dispute
     function test_RaiseDispute() public {
         _createEscrow();
         _completeMilestone();
@@ -76,7 +76,54 @@ contract EscrowTest is Test {
         assertEq(uint8(escrow.getState(1)), uint8(EscrowLibrary.State.Disputed));
     }   
 
-    
+    // function for test the dispute and resolve the dispute
+    function test_ResolveDispute()  public {
+        // create the escrow, complete the milestone and raise the dispute
+        _createEscrow();
+        _completeMilestone();
+        _raiseDispute();
+
+        uint256 balanceBefore = client.balance;
+        vm.startPrank(arbitrator);
+        // consider winner as client and resolve the dispute
+        escrow.resolveDispute(1, client);
+        vm.stopPrank();
+        uint256 balanceAfter = client.balance;
+        assertEq(balanceAfter - balanceBefore, AMOUNT);
+        assertEq(uint8(escrow.getState(1)), uint8(EscrowLibrary.State.Resolved));
+
+    }
+
+    // functionn for refund process
+    function test_Refund() public {
+        // first create the escrow and warp the time to pass the deadline
+        _createEscrow();
+        // warp means forward the time stamp to pass the deadline
+        vm.warp(block.timestamp + DEADLINE + 1);
+        uint256 balanceBefore = client.balance;
+        vm.startPrank(client);
+        escrow.refund(1);
+        vm.stopPrank();
+        uint256 balanceAfter = client.balance;
+        assertEq(balanceAfter - balanceBefore, AMOUNT); 
+        assertEq(uint8(escrow.getState(1)), uint8(EscrowLibrary.State.Refunded));
+    }
+
+    // function for test the revert error when attacker tries to approve and release funds
+     function test_Revert_NotClient() public {
+        _createEscrow();
+        _completeMilestone();
+        
+        vm.startPrank(attacker);
+        // expect the revert error to be NotClient when attacker tries to approve and release funds
+        vm.expectRevert(Errors.NotClient.selector);
+        escrow.approveAndRelease(1);
+        vm.stopPrank();
+    }
+
+
+
+
 
 
 
