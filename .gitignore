@@ -8,6 +8,7 @@ cache/
 dist/
 types/
 build/
+coverage/
 
 # Environment
 .env
@@ -31,4 +32,11 @@ npm-debug.log*
 # Security
 *.pem
 *.key
-.secrets.env
+.secrets
+
+# Typechain
+typechain-types/
+
+# Hardhat
+hardhat-*.json
+*.tsbuildinfo

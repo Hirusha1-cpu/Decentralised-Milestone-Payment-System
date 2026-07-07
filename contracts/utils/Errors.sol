@@ -2,24 +2,24 @@
 pragma solidity ^0.8.19;
 
 library Errors {
-    // ========== ACCESS CONTROL ERRORS ==========
+    // Access Control
     error NotClient();
     error NotFreelancer();
     error NotArbitrator();
     error NotClientOrFreelancer();
     
-    // ========== STATE ERRORS ==========
+    // State
     error InvalidState();
     error MilestoneNotComplete();
     error DeadlineNotPassed();
     error AlreadyResolved();
     
-    // ========== INPUT ERRORS ==========
+    // Input
     error InsufficientFunds();
     error InvalidAddress();
     error InvalidDeadline();
     error InvalidWinner();
     
-    // ========== TRANSFER ERRORS ==========
+    // Transfer
     error TransferFailed();
 }
