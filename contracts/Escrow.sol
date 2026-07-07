@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IEscrow} from "./interfaces/IEscrow.sol";
@@ -119,7 +119,7 @@ contract Escrow is ReentrancyGuard, IEscrow {
     }
 
     // function that get approval from the client and relase the funds for the freelancer and non-reentrant to prevent reentrancy attacks
-    function approveAndRelease(uint256 escrowId) external override onlyClient(escrowId) inState(escrowId, EscrowLibrary.State.Completed), nonReentrant {
+    function approveAndRelease(uint256 escrowId) external override onlyClient(escrowId) inState(escrowId, EscrowLibrary.State.Completed) nonReentrant {
         // get the escrow data
         EscrowLibrary.EscrowData storage escrow = escrows[escrowId];
         // check if the milestone is completed

@@ -121,12 +121,13 @@ contract EscrowTest is Test {
         vm.stopPrank();
     }
 
+    // function for test the revert error when attacker tries to raise dispute
     function _createEscrow() internal {
         vm.startPrank(client);
         escrow.createEscrow{value: AMOUNT}(freelancer, arbitrator, block.timestamp + DEADLINE);
         vm.stopPrank();
     }
-
+    
     function _completeMilestone() internal {
         vm.startPrank(freelancer);
         escrow.completeMilestone(1);

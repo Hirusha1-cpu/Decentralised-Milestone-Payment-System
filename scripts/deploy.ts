@@ -1,55 +1,53 @@
-import { ethers } from "hardhat";
+// scripts/deploy.ts - FIXED
+import { ethers, network, run } from "hardhat";  // ← run එක import කරන්න!
+import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
-  // Contract address (deployments folder එකෙන් ගන්න)
-  const contractAddress = "0xabcdef1234567890abcdef1234567890abcdef12";
-  
-  // Contract instance එක create කරනවා
-  const Escrow = await ethers.getContractFactory("Escrow");
-  const escrow = Escrow.attach(contractAddress);
-  
-  // Accounts ගන්න
-  const [client, freelancer, arbitrator] = await ethers.getSigners();
-  
-  console.log("📝 Testing Escrow Contract...");
-  
-  // 1. Escrow එකක් හදන්න
-  console.log("1️⃣ Creating escrow...");
-  const deadline = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
-  const tx = await escrow.connect(client).createEscrow(
-    freelancer.address,
-    arbitrator.address,
-    deadline,
-    { value: ethers.parseEther("1.0") }
-  );
-  await tx.wait();
-  console.log("✅ Escrow created!");
-  
-  // 2. Escrow ID එක ගන්න
-  const escrowId = 1;
-  
-  // 3. Freelancer work complete කරනවා
-  console.log("2️⃣ Completing milestone...");
-  const tx2 = await escrow.connect(freelancer).completeMilestone(escrowId);
-  await tx2.wait();
-  console.log("✅ Milestone completed!");
-  
-  // 4. Client approve කරනවා
-  console.log("3️⃣ Approving and releasing funds...");
-  const tx3 = await escrow.connect(client).approveAndRelease(escrowId);
-  await tx3.wait();
-  console.log("✅ Funds released!");
-  
-  // 5. Check state
-  const state = await escrow.getState(escrowId);
-  console.log(`📊 Current state: ${state}`);
-  
-  // 6. Check freelancer balance
-  const balance = await ethers.provider.getBalance(freelancer.address);
-  console.log(`💰 Freelancer balance: ${ethers.formatEther(balance)} ETH`);
+    console.log("🚀 Deploying Escrow Contract...");
+
+    const Escrow = await ethers.getContractFactory("Escrow");
+    const escrow = await Escrow.deploy();
+
+    await escrow.waitForDeployment();
+
+    const address = await escrow.getAddress();
+    console.log(`✅ Escrow deployed to: ${address}`);
+
+    const deploymentInfo = {
+        network: network.name,
+        address: address,
+        timestamp: new Date().toISOString(),
+        chainId: network.config.chainId
+    };
+
+    const deploymentsDir = path.join(__dirname, "../deployments");
+    if (!fs.existsSync(deploymentsDir)) {
+        fs.mkdirSync(deploymentsDir, { recursive: true });
+    }
+
+    fs.writeFileSync(
+        path.join(deploymentsDir, `${network.name}.json`),
+        JSON.stringify(deploymentInfo, null, 2)
+    );
+
+    console.log(`✅ Deployment info saved to deployments/${network.name}.json`);
+
+    if (network.name !== "hardhat" && network.name !== "localhost") {
+        console.log("⏳ Waiting for Etherscan verification...");
+        await escrow.deploymentTransaction()?.wait(5);
+        
+        // ✅ Use 'run' instead of 'hre.run'
+        await run("verify:verify", {
+            address: address,
+            constructorArguments: []
+        });
+        
+        console.log("✅ Contract verified on Etherscan");
+    }
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });

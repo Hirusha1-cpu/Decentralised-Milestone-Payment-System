@@ -14,6 +14,14 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "ReentrancyGuard",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ReentrancyGuard__factory>;
+    getContractFactory(
+      name: "Escrow",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Escrow__factory>;
+    getContractFactory(
       name: "IEscrow",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IEscrow__factory>;
@@ -23,6 +31,16 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.Errors__factory>;
 
     getContractAt(
+      name: "ReentrancyGuard",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ReentrancyGuard>;
+    getContractAt(
+      name: "Escrow",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Escrow>;
+    getContractAt(
       name: "IEscrow",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -34,6 +52,14 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.Errors>;
 
     deployContract(
+      name: "ReentrancyGuard",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyGuard>;
+    deployContract(
+      name: "Escrow",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Escrow>;
+    deployContract(
       name: "IEscrow",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IEscrow>;
@@ -42,6 +68,16 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Errors>;
 
+    deployContract(
+      name: "ReentrancyGuard",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyGuard>;
+    deployContract(
+      name: "Escrow",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Escrow>;
     deployContract(
       name: "IEscrow",
       args: any[],
