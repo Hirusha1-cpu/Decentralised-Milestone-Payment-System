@@ -121,6 +121,23 @@ contract EscrowTest is Test {
         vm.stopPrank();
     }
 
+    function _createEscrow() internal {
+        vm.startPrank(client);
+        escrow.createEscrow{value: AMOUNT}(freelancer, arbitrator, block.timestamp + DEADLINE);
+        vm.stopPrank();
+    }
+
+    function _completeMilestone() internal {
+        vm.startPrank(freelancer);
+        escrow.completeMilestone(1);
+        vm.stopPrank();
+    }
+
+    function _raiseDispute() internal {
+        vm.startPrank(client);
+        escrow.raiseDispute(1);
+        vm.stopPrank();
+    }
 
 
 
