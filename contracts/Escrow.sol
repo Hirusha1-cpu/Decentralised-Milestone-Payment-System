@@ -70,11 +70,73 @@ contract Escrow is ReentrancyGuard, IEscrow {
         if (msg.sender != escrows[escrowId].arbitrator) revert Errors.NotArbitrator();
         _;
     }
-
+    // checks the state is correct
     modifier inState(uint256 escrowId, EscrowLibrary.State state) {
         if (escrows[escrowId].currentState != state) revert Errors.InvalidState();
         _;
     }
+
+    // escrow create function
+    function createEscrow( address freelancer,address arbitrator,uint256 deadline) external payable override returns (uint256) {
+        if (msg.value == 0) revert Errors.InsufficientFunds();
+        if (freelancer == address(0)) revert Errors.InvalidAddress();
+        if (arbitrator == address(0)) revert Errors.InvalidAddress();
+        if (deadline <= block.timestamp) revert Errors.InvalidDeadline();
+
+        escrowCounter++;
+        // add the new escrow into array
+        escrows[escrowCounter] = EscrowLibrary.EscrowData({
+            client: msg.sender,
+            freelancer: freelancer,
+            arbitrator: arbitrator,
+            amount: msg.value,
+            deadline: deadline,
+            currentState: EscrowLibrary.State.Pending,
+            createdAt: block.timestamp,
+            milestoneCompleted: false
+        });
+        //emit the escrow created event
+        emit EscrowCreated(
+            escrowCounter,
+            msg.sender,
+            freelancer,
+            msg.value,
+            deadline
+        );
+
+        return escrowCounter;
+
+    }
+
+    // function that complete the freelancer side work for the client and relase for the approval onnly this function can call freelancer and state should be pending
+    function completeMilestone(uint256 escrowId) external override onlyFreelancer(escrowId) inState(escrowId, EscrowLibrary.State.Pending) {
+        // mark the milestone as completed
+        escrows[escrowId].milestoneCompleted = true;
+        // pending -> completed
+        escrows[escrowId].currentState = EscrowLibrary.State.Completed;
+        // emits the milestone completed event
+        emit MilestoneCompleted(escrowId, msg.sender);
+    }
+
+    // function that get approval from the client and relase the funds for the freelancer and non-reentrant to prevent reentrancy attacks
+    function approveAndRelease(uint256 escrowId) external override onlyClient(escrowId) inState(escrowId, EscrowLibrary.State.Completed), nonReentrant {
+        // get the escrow data
+        EscrowLibrary.EscrowData storage escrow = escrows[escrowId];
+        // check if the milestone is completed
+        if (!escrow.milestoneCompleted) revert Errors.MilestoneNotComplete();
+        // mark the escrow as released
+        escrow.currentState = EscrowLibrary.State.Released;
+        // get the amount to be released
+        uint256 amount = escrow.amount;
+        // set the amount to 0 to prevent reentrancy attacks
+        escrow.amount = 0;
+        // relase the funds to the freelancer
+        (bool success, ) = escrow.freelancer.call{value: amount}("");
+        if (!success) revert Errors.TransferFailed();
+        // emit the funds released event
+        emit FundsReleased(escrowId, msg.sender, amount);
+    }
+
 
 
 
