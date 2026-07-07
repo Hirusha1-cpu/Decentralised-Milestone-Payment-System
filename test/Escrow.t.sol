@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import "forge-std/Test.sol";
+import "../contracts/Escrow.sol";
+import "../contracts/libraries/EscrowLibrary.sol";
+
+contract EscrowTest is Test {
+    Escrow public escrow;
+    address public client = address(0x1);
+    address public freelancer = address(0x2);
+    address public arbitrator = address(0x3);
+    address public attacker = address(0x4);
+    uint256 public constant AMOUNT = 1 ether;
+    uint256 public constant DEADLINE = 7 days;
+
+    // new setup function to deploy the contract before each test
+    function setUp()  public {
+        escrow = new Escrow();
+        vm.deal(client, AMOUNT * 10);
+        vm.deal(attacker, AMOUNT);
+    }
+
+    // function for create the escrow
+    function test_CreateEscrow() public {
+        // start with another address with client role
+        vm.startPrank(client);
+        // create escrow with valid parameters
+        escrow.createEscrow{value: AMOUNT}(freelancer, arbitrator, block.timestamp + DEADLINE);
+        // stop the prank to reset the msg.sender
+        vm.stopPrank();
+        // save the escrow data in to memory 
+        EscrowLibrary.EscrowData memory data = escrow.getEscrowDetails(1);
+        assertEq(data.client, client);
+        assertEq(data.freelancer, freelancer);
+        assertEq(data.amount, AMOUNT);
+        assertEq(uint8(data.currentState), uint8(EscrowLibrary.State.Pending));
+    }
+
+    // function for complete milestone
+    function test_CompleteMilestone() public {
+        _createEscrow();
+        vm.startPrank(freelancer);
+        escrow.completeMilestone(1);
+        vm.stopPrank();         
+
+        EscrowLibrary.EscrowData memory data = escrow.getEscrowDetails(1);
+        assertTrue(data.milestoneCompleted);
+        assertEq(uint8(data.currentState), uint8(EscrowLibrary.State.Completed));
+    }   
+
+    // function for test the approvals and release of funds
+    function test_ApproveAndRelease() public {
+         _createEscrow();
+         _completeMilestone();
+
+        uint256 balanceBefore = freelancer.balance;
+        vm.startPrank(client);
+        escrow.approveAndRelease(1);
+        vm.stopPrank();
+        uint256 balanceAfter = freelancer.balance;
+        assertEq(balanceAfter - balanceBefore, AMOUNT);
+        assertEq(uint8(escrow.getState(1)), uint8(EscrowLibrary.State.Released));
+
+    }  
+
+    // function for test the dispute and resolve the dispute
+    function test_RaiseDispute() public {
+        _createEscrow();
+        _completeMilestone();
+        
+        vm.startPrank(client);
+        escrow.raiseDispute(1);
+        vm.stopPrank();
+
+        assertEq(uint8(escrow.getState(1)), uint8(EscrowLibrary.State.Disputed));
+    }   
+
+    
+
+
+
+}
