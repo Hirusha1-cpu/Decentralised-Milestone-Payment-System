@@ -1,6 +1,6 @@
 
 // ✅ Contract Address (Replace with your deployed address)
-export const CONTRACT_ADDRESS = "0x8feA62EF84B02304985742A70148c4Af3aA6bf6f";
+export const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 // ✅ Contract ABI (Copy from artifacts/)
 export const CONTRACT_ABI = [
