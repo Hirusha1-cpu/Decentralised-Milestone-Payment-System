@@ -10,7 +10,8 @@
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "rootDir": "./"  
   },
   "include": [
     "./scripts/**/*",
@@ -18,5 +19,13 @@
     "./typechain-types/**/*",
     "hardhat.config.ts"
   ],
-  "files": ["./hardhat.config.ts"]
+  "files": ["./hardhat.config.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "artifacts",
+    "cache",
+    "coverage",
+    "typechain-types"
+  ]
 }
