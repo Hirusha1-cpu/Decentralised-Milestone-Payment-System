@@ -5,8 +5,9 @@ import * as path from "path";
 
 // Import ABI
 import EscrowArtifact from "../artifacts/contracts/Escrow.sol/Escrow.json";
-
+// npx hardhat run scripts/send-op-tx.ts --network sepolia
 async function main() {
+    // start of the script
     console.log("=".repeat(60));
     console.log("📝 Escrow Contract Interaction");
     console.log("=".repeat(60));
@@ -20,8 +21,9 @@ async function main() {
         console.log(`   npx hardhat run scripts/deploy.ts --network ${network.name}`);
         process.exit(1);
     }
-    
+    // Read deployment info
     const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
+    // Extract contract address
     const contractAddress = deployment.address;
     console.log(`\n📍 Contract Address: ${contractAddress}`);
     console.log(`🌐 Network: ${network.name}`);
@@ -30,6 +32,7 @@ async function main() {
     let client, freelancer, arbitrator;
     
     try {
+      // Get signers from Hardhat
         const signers = await ethers.getSigners();
         
         if (signers.length === 0) {
@@ -37,7 +40,7 @@ async function main() {
             console.log("💡 Please make sure you have accounts configured in hardhat.config.ts");
             process.exit(1);
         }
-        
+        // Assign signers with fallback to the first signer if not enough accounts are available
         client = signers[0];
         freelancer = signers[1] || signers[0];
         arbitrator = signers[2] || signers[0];
@@ -61,12 +64,12 @@ async function main() {
         console.log("   npx hardhat compile");
         process.exit(1);
     }
-    
+    // Read ABI from artifact
     const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
     const abi = artifact.abi;
     console.log(`\n✅ ABI loaded`);
 
-    // 4. Create contract instance
+    // 4. Create contract instance for the escrow contract using the client signer
     const escrow = await ethers.getContractAt(abi, contractAddress, client);
     console.log("✅ Contract instance created");
 
@@ -82,8 +85,9 @@ async function main() {
 
         // Step 2: Create escrow
         console.log("\n1️⃣ Creating escrow...");
+        // set deadline to 7 days from now
         const deadline = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
-        
+        // Create escrow with 0.01 ETH
         const tx1 = await escrow.createEscrow(
             freelancer.address,
             arbitrator.address,
@@ -91,21 +95,26 @@ async function main() {
             { value: ethers.parseEther("0.01") }
         );
         console.log(`   ⏳ Transaction: ${tx1.hash}`);
+        // Wait for the transaction to be mined
         await tx1.wait();
         console.log("   ✅ Escrow created!");
 
         // Step 3: Get escrow ID
+        // Get the new escrow count after creation
         const newCount = await escrow.escrowCounter();
+        // Get the new escrow ID (which is the previous count)
         const escrowId = Number(newCount);
         console.log(`   📋 Escrow ID: ${escrowId}`);
 
         // Step 4: Complete milestone
         console.log("\n2️⃣ Completing milestone...");
+        // Create a new contract instance for the freelancer signer
         const escrowAsFreelancer = await ethers.getContractAt(
             abi,
             contractAddress,
             freelancer
         );
+        // Complete milestone as freelancer
         const tx2 = await escrowAsFreelancer.completeMilestone(escrowId);
         console.log(`   ⏳ Transaction: ${tx2.hash}`);
         await tx2.wait();
