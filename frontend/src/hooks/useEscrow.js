@@ -1,25 +1,20 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESS, ESCROW_STATES } from '../utils/constants';
+import { getContractAddress, ESCROW_STATES } from '../utils/constants';
 import { CONTRACT_ABI } from '../utils/abi';
-import { getContractAddress } from '../utils/constants';
 
-
-export function useEscrow(signer) {
+export function useEscrow(signer, chainId) {   // 👈 chainId parameter අලුතින්
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [transactionHash, setTransactionHash] = useState(null);
 
-    // Get contract instance
     const getContract = useCallback(() => {
         if (!signer) {
             throw new Error('Wallet not connected');
         }
-        return signer.provider.getNetwork().then((network) => {
-            const address = getContractAddress(Number(network.chainId));
-            return new ethers.Contract(address, CONTRACT_ABI, signer);
-        });
-    }, [signer]);
+        const address = getContractAddress(chainId);   // 👈 chainId අනුව address
+        return new ethers.Contract(address, CONTRACT_ABI, signer);
+    }, [signer, chainId]);
 
     const createEscrow = useCallback(async (freelancer, arbitrator, deadline, amount) => {
         setIsLoading(true);
@@ -180,7 +175,9 @@ export function useEscrow(signer) {
     // Get Escrow Details
     const getEscrowDetails = useCallback(async (escrowId, provider) => {
         try {
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+            const network = await provider.getNetwork();
+            const address = getContractAddress(Number(network.chainId));
+            const contract = new ethers.Contract(address, CONTRACT_ABI, provider);
             const details = await contract.getEscrowDetails(escrowId);
 
             return {
@@ -203,7 +200,9 @@ export function useEscrow(signer) {
     // Get Escrow Counter
     const getEscrowCounter = useCallback(async (provider) => {
         try {
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+            const network = await provider.getNetwork();
+            const address = getContractAddress(Number(network.chainId));
+            const contract = new ethers.Contract(address, CONTRACT_ABI, provider);
             const counter = await contract.escrowCounter();
             return Number(counter);
         } catch (error) {
