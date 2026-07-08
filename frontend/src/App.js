@@ -7,6 +7,7 @@ import './styles/App.css';
 function App() {
   const {
     account,
+    chainId, 
     isConnected,
     isLoading,
     error,

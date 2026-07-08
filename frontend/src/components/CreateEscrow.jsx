@@ -3,8 +3,11 @@ import { useEscrow } from "../hooks/useEscrow";
 import { useWallet } from "../hooks/useWallet";
 
 export function CreateEscrow() {
-  const { signer } = useWallet();
-  const { createEscrow, isLoading, error, transactionHash } = useEscrow(signer);
+  const { signer, chainId } = useWallet();
+  const { createEscrow, isLoading, error, transactionHash } = useEscrow(
+    signer,
+    chainId,
+  );
   const [freelancer, setFreelancer] = useState("");
   const [arbitrator, setArbitrator] = useState("");
   const [amount, setAmount] = useState("");
@@ -46,7 +49,7 @@ export function CreateEscrow() {
   return (
     <div className="create-escrow">
       <h2>Create Escrow</h2>
-      
+
       {error && (
         <div className="alert alert-error">
           <strong>Error:</strong> {error}
@@ -54,12 +57,17 @@ export function CreateEscrow() {
       )}
 
       {result && (
-        <div className={`alert alert-${result.success ? 'success' : 'error'}`}>
+        <div className={`alert alert-${result.success ? "success" : "error"}`}>
           {result.message}
           {result.tx && (
             <div>
               <small>
-                Tx: <a href={`https://sepolia.etherscan.io/tx/${result.tx}`} target="_blank" rel="noopener noreferrer">
+                Tx:{" "}
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${result.tx}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   View on Etherscan
                 </a>
               </small>
@@ -116,7 +124,7 @@ export function CreateEscrow() {
         </div>
 
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Creating...' : 'Create Escrow'}
+          {isLoading ? "Creating..." : "Create Escrow"}
         </button>
       </form>
     </div>
