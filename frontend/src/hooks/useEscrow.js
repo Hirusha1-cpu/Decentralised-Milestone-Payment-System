@@ -27,7 +27,7 @@ export function useEscrow(signer) {
         setTransactionHash(null);
 
         try {
-            const contract = getContract();
+            const contract = await getContract();
             const tx = await contract.createEscrow(
                 freelancer,
                 arbitrator,
