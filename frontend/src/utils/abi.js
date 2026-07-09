@@ -1,73 +1,152 @@
-
 // ✅ Contract Address (Replace with your deployed address)
 // export const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
-// ✅ Contract ABI (Copy from artifacts/)
+// ✅ Contract ABI (Copy from artifacts/contracts/Escrow.sol/Escrow.json)
 export const CONTRACT_ABI = [
+  { "inputs": [], "name": "DeadlineNotPassed", "type": "error" },
+  { "inputs": [], "name": "InsufficientFunds", "type": "error" },
+  { "inputs": [], "name": "InvalidAddress", "type": "error" },
+  { "inputs": [], "name": "InvalidDeadline", "type": "error" },
+  { "inputs": [], "name": "InvalidState", "type": "error" },
+  { "inputs": [], "name": "InvalidWinner", "type": "error" },
+  { "inputs": [], "name": "MilestoneNotComplete", "type": "error" },
+  { "inputs": [], "name": "NotArbitrator", "type": "error" },
+  { "inputs": [], "name": "NotClient", "type": "error" },
+  { "inputs": [], "name": "NotClientOrFreelancer", "type": "error" },
+  { "inputs": [], "name": "NotFreelancer", "type": "error" },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  { "inputs": [], "name": "TransferFailed", "type": "error" },
   {
+    "anonymous": false,
     "inputs": [
-      { "name": "freelancer", "type": "address" },
-      { "name": "arbitrator", "type": "address" },
-      { "name": "deadline", "type": "uint256" }
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "raiser", "type": "address" }
     ],
-    "name": "createEscrow",
-    "outputs": [{ "name": "", "type": "uint256" }],
-    "stateMutability": "payable",
-    "type": "function"
+    "name": "DisputeRaised",
+    "type": "event"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
-    "name": "completeMilestone",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "winner", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "DisputeResolved",
+    "type": "event"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "client", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "freelancer", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "deadline", "type": "uint256" }
+    ],
+    "name": "EscrowCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "recipient", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "FundsReleased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "freelancer", "type": "address" }
+    ],
+    "name": "MilestoneCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "recipient", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "Refunded",
+    "type": "event"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
     "name": "approveAndRelease",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
-    "name": "raiseDispute",
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
+    "name": "completeMilestone",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      { "name": "escrowId", "type": "uint256" },
-      { "name": "winner", "type": "address" }
+      { "internalType": "address", "name": "freelancer", "type": "address" },
+      { "internalType": "address", "name": "arbitrator", "type": "address" },
+      { "internalType": "uint256", "name": "deadline", "type": "uint256" }
     ],
-    "name": "resolveDispute",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "createEscrow",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
-    "name": "refund",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "inputs": [],
+    "name": "escrowCounter",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "escrows",
+    "outputs": [
+      { "internalType": "address", "name": "client", "type": "address" },
+      { "internalType": "address", "name": "freelancer", "type": "address" },
+      { "internalType": "address", "name": "arbitrator", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+      { "internalType": "enum EscrowLibrary.State", "name": "currentState", "type": "uint8" },
+      { "internalType": "uint256", "name": "createdAt", "type": "uint256" },
+      { "internalType": "bool", "name": "milestoneCompleted", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEscrowCounter",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
     "name": "getEscrowDetails",
     "outputs": [
       {
         "components": [
-          { "name": "client", "type": "address" },
-          { "name": "freelancer", "type": "address" },
-          { "name": "arbitrator", "type": "address" },
-          { "name": "amount", "type": "uint256" },
-          { "name": "deadline", "type": "uint256" },
-          { "name": "currentState", "type": "uint8" },
-          { "name": "createdAt", "type": "uint256" },
-          { "name": "milestoneCompleted", "type": "bool" }
+          { "internalType": "address", "name": "client", "type": "address" },
+          { "internalType": "address", "name": "freelancer", "type": "address" },
+          { "internalType": "address", "name": "arbitrator", "type": "address" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          { "internalType": "enum EscrowLibrary.State", "name": "currentState", "type": "uint8" },
+          { "internalType": "uint256", "name": "createdAt", "type": "uint256" },
+          { "internalType": "bool", "name": "milestoneCompleted", "type": "bool" }
         ],
+        "internalType": "struct EscrowLibrary.EscrowData",
         "name": "",
         "type": "tuple"
       }
@@ -76,17 +155,34 @@ export const CONTRACT_ABI = [
     "type": "function"
   },
   {
-    "inputs": [{ "name": "escrowId", "type": "uint256" }],
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
     "name": "getState",
-    "outputs": [{ "name": "", "type": "uint8" }],
+    "outputs": [{ "internalType": "enum EscrowLibrary.State", "name": "", "type": "uint8" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "escrowCounter",
-    "outputs": [{ "name": "", "type": "uint256" }],
-    "stateMutability": "view",
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
+    "name": "raiseDispute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "escrowId", "type": "uint256" }],
+    "name": "refund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "escrowId", "type": "uint256" },
+      { "internalType": "address", "name": "winner", "type": "address" }
+    ],
+    "name": "resolveDispute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ];
@@ -109,7 +205,7 @@ export const TRANSACTION_STATUS = {
 // ✅ Escrow States (Matches Solidity enum)
 export const ESCROW_STATES = {
   0: "Pending",
-  1: "Completed", 
+  1: "Completed",
   2: "Released",
   3: "Disputed",
   4: "Resolved",

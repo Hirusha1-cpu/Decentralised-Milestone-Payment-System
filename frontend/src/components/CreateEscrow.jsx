@@ -28,7 +28,7 @@ export function CreateEscrow() {
       deadline,
       amount,
     );
-
+    
     if (response.success) {
       setResult({
         success: true,
