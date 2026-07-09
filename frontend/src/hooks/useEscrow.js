@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { getContractAddress, ESCROW_STATES } from '../utils/constants';
 import { CONTRACT_ABI } from '../utils/abi';
 
-export function useEscrow(signer, chainId) {   // 👈 chainId parameter අලුතින්
+export function useEscrow(signer, chainId) {   // 👈 chainId parameter 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [transactionHash, setTransactionHash] = useState(null);
