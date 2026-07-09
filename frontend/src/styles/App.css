@@ -400,3 +400,32 @@ button[type="submit"]:disabled {
 .btn-warning:hover {
   background: #dd6b20;
 }
+
+.btn-refresh {
+  background: #4299e1;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.btn-refresh:hover {
+  background: #3182ce;
+  transform: rotate(90deg);
+}
+
+.account-info {
+  background: #edf2f7;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.account-info p {
+  margin: 5px 0;
+}

@@ -1,3 +1,4 @@
+// frontend/src/App.js
 import React, { useState } from 'react';
 import { useWallet } from './hooks/useWallet';
 import { CreateEscrow } from './components/CreateEscrow';
@@ -18,6 +19,19 @@ function App() {
 
   const [activeTab, setActiveTab] = useState('create');
 
+  // ✅ Force refresh function
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  // ✅ Copy account to clipboard
+  const copyAddress = () => {
+    if (account) {
+      navigator.clipboard.writeText(account);
+      alert('✅ Address copied!');
+    }
+  };
+
   return (
     <div className="app">
       <header className="header">
@@ -25,14 +39,18 @@ function App() {
         <div className="wallet-info">
           {isConnected ? (
             <>
-              <span className="address">
+              <span className="address" onClick={copyAddress} style={{ cursor: 'pointer' }}>
                 {account.slice(0, 6)}...{account.slice(-4)}
+                <span style={{ fontSize: '10px', marginLeft: '5px' }}>📋</span>
               </span>
               {chainId !== 11155111 && (
                 <button onClick={switchToSepolia} className="btn-warning">
                   ⚠️ Switch to Sepolia
                 </button>
               )}
+              <button onClick={handleRefresh} className="btn-refresh" title="Refresh wallet">
+                🔄
+              </button>
               <button onClick={disconnectWallet} className="btn-disconnect">
                 Disconnect
               </button>
@@ -62,6 +80,11 @@ function App() {
           </div>
         ) : (
           <>
+            <div className="account-info">
+              <p>👤 Connected: <strong>{account}</strong></p>
+              <p>🌐 Network: {chainId === 11155111 ? '✅ Sepolia' : `⚠️ ${chainId}`}</p>
+            </div>
+
             <div className="tabs">
               <button 
                 className={`tab ${activeTab === 'create' ? 'active' : ''}`}
@@ -88,8 +111,8 @@ function App() {
       <footer className="footer">
         <p>Built with ❤️ on Sepolia Testnet</p>
         <p>
-          Contract: <a href="https://sepolia.etherscan.io/address/0x238D25C84b72A6D2D90918262165661ccEB9B268#code" target="_blank">
-            0x238D25C84b72A6D2D90918262165661ccEB9B268
+          Contract: <a href="https://sepolia.etherscan.io/address/0x8feA62EF84B02304985742A70148c4Af3aA6bf6f#code" target="_blank">
+            0x8feA62EF...
           </a>
         </p>
       </footer>
