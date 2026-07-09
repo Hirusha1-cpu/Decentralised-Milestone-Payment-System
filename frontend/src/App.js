@@ -1,7 +1,7 @@
-// src/App.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useWallet } from './hooks/useWallet';
 import { CreateEscrow } from './components/CreateEscrow';
+import { EscrowList } from './components/EscrowList';
 import './styles/App.css';
 
 function App() {
@@ -16,6 +16,8 @@ function App() {
     switchToSepolia
   } = useWallet();
 
+  const [activeTab, setActiveTab] = useState('create');
+
   return (
     <div className="app">
       <header className="header">
@@ -26,6 +28,11 @@ function App() {
               <span className="address">
                 {account.slice(0, 6)}...{account.slice(-4)}
               </span>
+              {chainId !== 11155111 && (
+                <button onClick={switchToSepolia} className="btn-warning">
+                  ⚠️ Switch to Sepolia
+                </button>
+              )}
               <button onClick={disconnectWallet} className="btn-disconnect">
                 Disconnect
               </button>
@@ -54,17 +61,35 @@ function App() {
             <p>Please connect your wallet to get started</p>
           </div>
         ) : (
-          <div className="content">
-            <CreateEscrow />
-          </div>
+          <>
+            <div className="tabs">
+              <button 
+                className={`tab ${activeTab === 'create' ? 'active' : ''}`}
+                onClick={() => setActiveTab('create')}
+              >
+                🆕 Create Escrow
+              </button>
+              <button 
+                className={`tab ${activeTab === 'list' ? 'active' : ''}`}
+                onClick={() => setActiveTab('list')}
+              >
+                📋 My Escrows
+              </button>
+            </div>
+
+            <div className="tab-content">
+              {activeTab === 'create' && <CreateEscrow />}
+              {activeTab === 'list' && <EscrowList />}
+            </div>
+          </>
         )}
       </main>
 
       <footer className="footer">
         <p>Built with ❤️ on Sepolia Testnet</p>
         <p>
-          Contract: <a href="https://sepolia.etherscan.io/address/0x8feA62EF84B02304985742A70148c4Af3aA6bf6f#code" target="_blank">
-            0x8feA62EF...
+          Contract: <a href="https://sepolia.etherscan.io/address/0x238D25C84b72A6D2D90918262165661ccEB9B268#code" target="_blank">
+            0x238D25C84b72A6D2D90918262165661ccEB9B268
           </a>
         </p>
       </footer>
