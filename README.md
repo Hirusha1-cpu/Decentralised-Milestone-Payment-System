@@ -228,19 +228,6 @@ npx hardhat coverage
 
 ---
 
-## 📸 Screenshots
-
-> Add screenshots here
-
-```
-screenshots/
-├── home.png
-├── create-escrow.png
-├── escrow-details.png
-└── dispute.png
-```
-
----
 
 ## 🤝 Contributing
 
